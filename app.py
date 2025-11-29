@@ -19,14 +19,14 @@ st.markdown("""
     .red-bg {background-color: #f8d7da !important; padding:2px; border-radius:3px;}
     .orange-bg {background-color: #fff3cd !important; padding:2px; border-radius:3px;}
 
-    /* Color the first three text inputs (Entry, Stop, Target) */
-    div[data-testid="stTextInput"]:nth-of-type(1) input {
+    /* Color specific input fields by their label */
+    input[aria-label="Entry Price (USD)"] {
         background-color: #d4edda !important;   /* Entry - green */
     }
-    div[data-testid="stTextInput"]:nth-of-type(2) input {
+    input[aria-label="Stop-Loss Price (USD)"] {
         background-color: #f8d7da !important;   /* Stop - red */
     }
-    div[data-testid="stTextInput"]:nth-of-type(3) input {
+    input[aria-label="Target Price (USD)"] {
         background-color: #fff3cd !important;   /* Target - orange */
     }
 </style>
@@ -38,18 +38,21 @@ if "dca_pct_slider" not in st.session_state:
 if "dca_pct_input" not in st.session_state:
     st.session_state.dca_pct_input = 50
 
+
 def sync_dca_from_slider():
     st.session_state.dca_pct_input = st.session_state.dca_pct_slider
 
+
 def sync_dca_from_input():
-    # clamp between 0 and 100 just in case
     val = st.session_state.dca_pct_input
+    # Clamp between 0 and 100 just in case
     if val < 0:
         val = 0
     if val > 100:
         val = 100
     st.session_state.dca_pct_input = val
     st.session_state.dca_pct_slider = val
+
 
 with col1:
     # Use text_input to allow background color for small decimals
@@ -62,7 +65,7 @@ with col1:
         entry = float(entry)
         stop = float(stop)
         target = float(target)
-    except:
+    except Exception:
         st.error("Entry, Stop-Loss, and Target must be valid decimal numbers.")
         st.stop()
 
@@ -70,7 +73,7 @@ with col1:
     risk = st.number_input("Dollar Risk ($)", value=100.0, step=10.0)
     account_balance = st.number_input("Account Balance ($)", value=5000.0, step=100.0)
 
-    # Read-only style for position side: use radio instead of selectbox
+    # Read-only style for position side: radio instead of free-text input
     side = st.radio("Position Side", ["Long", "Short"], horizontal=True)
 
     # --- DCA controls ---
@@ -78,6 +81,7 @@ with col1:
 
     if use_dca:
         st.write("Adjust DCA either with slider or by typing exact %:")
+
         st.slider(
             "DCA Percentage (%) - Slider",
             min_value=0,
